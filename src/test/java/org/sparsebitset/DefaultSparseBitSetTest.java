@@ -415,6 +415,32 @@ public class DefaultSparseBitSetTest {
         assertTrue(set.get(SparseBitIntIndex.of(0xFE)));
     }
 
+    @Test
+    public void testPrematureSquashing() {
+        SparseBitSet<SparseBitIntIndex> set = new DefaultSparseBitSet<>(SparseBitIntIndex.LEVELS, 240);
+        set.validate();
+
+        // set 239 bits
+        for (int i = 0; i < 239; i++) {
+            assertTrue(set.set(SparseBitIntIndex.of(0x11223300 + i)));
+        }
+        set.validate();
+
+        // there should be no squashing yet
+        assertFalse(set.get(SparseBitIntIndex.of(0x112233FF)));
+
+        // set 240th bit
+        assertTrue(set.set(SparseBitIntIndex.of(0x11223300 + 240)));
+        set.validate();
+
+        // there should be squashing on this level
+        assertTrue(set.get(SparseBitIntIndex.of(0x112233FF)));
+
+        // but no squashing on neighbour levels
+        assertFalse(set.get(SparseBitIntIndex.of(0x112232FF)));
+        assertFalse(set.get(SparseBitIntIndex.of(0x11223400)));
+    }
+
     private static void checkRange(SparseBitSet<SparseBitIntIndex> set,
                                    int fromIndexInclusive, int toIndexInclusive, boolean expected)
     {

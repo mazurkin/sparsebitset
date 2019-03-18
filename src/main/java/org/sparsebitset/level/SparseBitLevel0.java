@@ -1,6 +1,5 @@
 package org.sparsebitset.level;
 
-import org.sparsebitset.SparseBitSet;
 import org.sparsebitset.index.SparseBitIndex;
 import org.sparsebitset.util.SparseBitUtil;
 
@@ -9,7 +8,7 @@ import java.util.BitSet;
 /**
  * <p>Subset represents a final level of hierarchical sparse bit set</p>
  */
-public class SparseBitLevel0 implements SparseBitSet<SparseBitIndex> {
+public class SparseBitLevel0 implements SparseBitLevel {
 
     private final BitSet bits;
 
@@ -23,6 +22,11 @@ public class SparseBitLevel0 implements SparseBitSet<SparseBitIndex> {
         this.bits = new BitSet(SparseBitUtil.LEVEL_SIZE);
 
         this.currentOccupancy = 0;
+    }
+
+    @Override
+    public SparseBitLevelType getType() {
+        return SparseBitLevelType.REAL;
     }
 
     @Override

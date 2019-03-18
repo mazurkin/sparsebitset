@@ -1,6 +1,7 @@
 package org.sparsebitset;
 
 import org.sparsebitset.index.SparseBitIndex;
+import org.sparsebitset.level.SparseBitLevel;
 import org.sparsebitset.level.SparseBitLevels;
 import org.sparsebitset.util.SparseBitUtil;
 
@@ -19,7 +20,7 @@ public class DefaultSparseBitSet<I extends SparseBitIndex> implements SparseBitS
 
     private final int levels;
 
-    private final SparseBitSet<I> base;
+    private final SparseBitLevel base;
 
     /**
      * Constructs a default set
@@ -27,7 +28,6 @@ public class DefaultSparseBitSet<I extends SparseBitIndex> implements SparseBitS
      * @param levels How many levels are in the index (bits = levels * 8)
      * @param maximumOccupancy How many items (bits) must be in underlying layer in order to collapse it (2..256)
      */
-    @SuppressWarnings("unchecked")
     public DefaultSparseBitSet(int levels, int maximumOccupancy) {
         if (levels <= 0) {
             throw new IllegalArgumentException("Need positive level count: " + levels);
@@ -38,7 +38,7 @@ public class DefaultSparseBitSet<I extends SparseBitIndex> implements SparseBitS
         }
 
         this.levels = levels;
-        this.base = (SparseBitSet<I>) SparseBitLevels.createUnderlying(maximumOccupancy, levels);
+        this.base = SparseBitLevels.createLevel(maximumOccupancy, levels);
     }
 
     /**

@@ -1,73 +1,66 @@
 package org.sparsebitset.level;
 
-import org.sparsebitset.SparseBitSet;
 import org.sparsebitset.index.SparseBitConstIndex;
 import org.sparsebitset.index.SparseBitIndex;
 import org.sparsebitset.util.SparseBitUtil;
 
-import java.util.BitSet;
-
 /**
  * <p>Subset represents an intermediate level of hierarchical sparse bit set</p>
  */
-public class SparseBitLevelN implements SparseBitSet<SparseBitIndex> {
+public class SparseBitLevelN implements SparseBitLevel {
 
     private final int level;
 
-    private final BitSet collapses;
-
-    private final SparseBitSet<SparseBitIndex>[] underlyings;
+    private final SparseBitLevel[] underlyings;
 
     private final int maximumOccupancy;
 
-    private int currentOccupancy;
+    private int currentFullCount;
 
-    private int currentUsage;
+    private int currentRealCount;
 
-    @SuppressWarnings("unchecked")
     SparseBitLevelN(int maximumOccupancy, int level) {
         this.maximumOccupancy = maximumOccupancy;
         this.level = level;
 
-        this.collapses = new BitSet(SparseBitUtil.LEVEL_SIZE);
-        this.underlyings = new SparseBitSet[SparseBitUtil.LEVEL_SIZE];
+        this.underlyings = new SparseBitLevel[SparseBitUtil.LEVEL_SIZE];
 
-        this.currentOccupancy = 0;
-        this.currentUsage = 0;
+        clearAll();
+    }
+
+    @Override
+    public SparseBitLevelType getType() {
+        return SparseBitLevelType.REAL;
     }
 
     @Override
     public boolean isEmpty() {
-        return (currentOccupancy == 0) && (currentUsage == 0);
+        return (currentFullCount == 0) && (currentRealCount == 0);
     }
 
     @Override
     public boolean isFull() {
-        return (currentOccupancy >= maximumOccupancy);
+        return (currentFullCount >= maximumOccupancy);
     }
 
     @Override
     public void clearAll() {
-        collapses.clear();
-
         for (int i = 0; i < SparseBitUtil.LEVEL_SIZE; i++) {
-            underlyings[i] = null;
+            underlyings[i] = SparseBitLevels.NULL;
         }
 
-        currentOccupancy = 0;
-        currentUsage = 0;
+        currentFullCount = 0;
+        currentRealCount = 0;
     }
 
     @Override
     public void setAll() {
-        collapses.set(0, SparseBitUtil.LEVEL_SIZE);
-
         for (int i = 0; i < SparseBitUtil.LEVEL_SIZE; i++) {
-            underlyings[i] = null;
+            underlyings[i] = SparseBitLevels.SQUASHED;
         }
 
-        currentOccupancy = SparseBitUtil.LEVEL_SIZE;
-        currentUsage = 0;
+        currentFullCount = SparseBitUtil.LEVEL_SIZE;
+        currentRealCount = 0;
     }
 
     @Override
@@ -77,33 +70,30 @@ public class SparseBitLevelN implements SparseBitSet<SparseBitIndex> {
 
     @Override
     public void validate() {
-        int realOccupancy = 0;
-        int realUsage = 0;
+        int calculatedFullCount = 0;
+        int calculatedRealCount = 0;
 
         for (int i = 0; i < SparseBitUtil.LEVEL_SIZE; i++) {
-            SparseBitSet<SparseBitIndex> underlying = underlyings[i];
+            SparseBitLevel underlying = underlyings[i];
+            underlying.validate();
 
-            boolean collapsed = collapses.get(i);
-
-            if (underlyings[i] != null && collapsed) {
-                throw new IllegalStateException("Both underlying and collapsed are set");
-            }
-
-            if (collapsed) {
-                realOccupancy++;
-            }
-
-            if (underlying != null) {
-                realUsage++;
-                underlying.validate();
+            switch (underlying.getType()) {
+                case FULL: {
+                    calculatedFullCount++;
+                    break;
+                }
+                case REAL: {
+                    calculatedRealCount++;
+                    break;
+                }
             }
         }
 
-        if (currentOccupancy != realOccupancy) {
+        if (currentFullCount != calculatedFullCount) {
             throw new IllegalStateException("Effective occupancy and real occupancy don't match on level " + level);
         }
 
-        if (currentUsage != realUsage) {
+        if (currentRealCount != calculatedRealCount) {
             throw new IllegalStateException("Effective usage and real usage don't match on level " + level);
         }
     }
@@ -113,16 +103,8 @@ public class SparseBitLevelN implements SparseBitSet<SparseBitIndex> {
         int segment = index.segment(level);
         SparseBitUtil.checkSegment(segment);
 
-        if (collapses.get(segment)) {
-            return true;
-        } else {
-            SparseBitSet<SparseBitIndex> underlying = underlyings[segment];
-            if (underlying != null) {
-                return underlying.get(index);
-            } else {
-                return false;
-            }
-        }
+        SparseBitLevel underlying = underlyings[segment];
+        return underlying.get(index);
     }
 
     @Override
@@ -130,19 +112,27 @@ public class SparseBitLevelN implements SparseBitSet<SparseBitIndex> {
         int segment = index.segment(level);
         SparseBitUtil.checkSegment(segment);
 
-        if (collapses.get(segment)) {
-            return true;
+        SparseBitLevel underlying = underlyings[segment];
+        switch (underlying.getType()) {
+            case REAL: {
+                boolean result = underlying.set(index);
+
+                if (underlying.isFull()) {
+                    squashUnderlying(segment);
+                }
+
+                return result;
+            }
+            case NULL: {
+                underlying = requireUnderlying(segment);
+
+                return underlying.set(index);
+            }
+            case FULL:
+                return false;
         }
 
-        SparseBitSet<SparseBitIndex> underlying = requireUnderlying(segment);
-
-        boolean result = underlying.set(index);
-
-        if (underlying.isFull()) {
-            collapseUnderlying(segment);
-        }
-
-        return result;
+        throw new IllegalStateException("Illegal execution branch");
     }
 
     @Override
@@ -150,22 +140,27 @@ public class SparseBitLevelN implements SparseBitSet<SparseBitIndex> {
         int segment = index.segment(level);
         SparseBitUtil.checkSegment(segment);
 
-        if (collapses.get(segment)) {
-            unfoldUnderlying(segment);
-        }
+        SparseBitLevel underlying = underlyings[segment];
+        switch (underlying.getType()) {
+            case REAL: {
+                boolean result = underlying.clear(index);
 
-        SparseBitSet<SparseBitIndex> underlying = underlyings[segment];
-        if (underlying != null) {
-            boolean result = underlying.clear(index);
+                if (underlying.isEmpty()) {
+                    dismissUnderlying(segment);
+                }
 
-            if (underlying.isEmpty()) {
-                dismissUnderlying(segment);
+                return result;
             }
+            case NULL:
+                return false;
+            case FULL: {
+                underlying = unfoldUnderlying(segment);
 
-            return result;
-        } else {
-            return false;
+                return underlying.clear(index);
+            }
         }
+
+        throw new IllegalStateException("Illegal execution branch");
     }
 
     @Override
@@ -173,19 +168,24 @@ public class SparseBitLevelN implements SparseBitSet<SparseBitIndex> {
         int segment = index.segment(level);
         SparseBitUtil.checkSegment(segment);
 
-        if (collapses.get(segment)) {
-            unfoldUnderlying(segment);
-        }
+        SparseBitLevel underlying = underlyings[segment];
+        switch (underlying.getType()) {
+            case NULL: {
+                underlying = requireUnderlying(segment);
 
-        SparseBitSet<SparseBitIndex> underlying = underlyings[segment];
-        if (underlying == null) {
-            underlying = requireUnderlying(segment);
+                break;
+            }
+            case FULL: {
+                underlying = unfoldUnderlying(segment);
+
+                break;
+            }
         }
 
         underlying.flip(index);
 
         if (underlying.isFull()) {
-            collapseUnderlying(segment);
+            squashUnderlying(segment);
         } else if (underlying.isEmpty()) {
             dismissUnderlying(segment);
         }
@@ -211,27 +211,48 @@ public class SparseBitLevelN implements SparseBitSet<SparseBitIndex> {
     }
 
     private void setSegment(SparseBitIndex fromIndexInclusive, SparseBitIndex toIndexInclusive, int segment) {
-        if (collapses.get(segment)) {
+        SparseBitLevel underlying = underlyings[segment];
+        if (underlying.getType() == SparseBitLevelType.FULL) {
             return;
         }
 
         int affected = 1 + toIndexInclusive.segment(level - 1) - fromIndexInclusive.segment(level - 1);
 
         if (affected >= maximumOccupancy) {
-            SparseBitSet<SparseBitIndex> underlying = underlyings[segment];
-            if (underlying != null) {
-                collapseUnderlying(segment);
-            } else {
-                collapses.set(segment);
-                currentOccupancy++;
+            switch (underlying.getType()) {
+                case REAL: {
+                    squashUnderlying(segment);
+
+                    break;
+                }
+                case NULL: {
+                    underlyings[segment] = SparseBitLevels.SQUASHED;
+
+                    currentFullCount++;
+
+                    break;
+                }
             }
         } else {
-            SparseBitSet<SparseBitIndex> underlying = requireUnderlying(segment);
-            underlying.set(fromIndexInclusive, toIndexInclusive);
+            switch (underlying.getType()) {
+                case REAL: {
+                    underlying.set(fromIndexInclusive, toIndexInclusive);
 
-            if (underlying.isFull()) {
-                collapseUnderlying(segment);
+                    if (underlying.isFull()) {
+                        squashUnderlying(segment);
+                    }
+
+                    break;
+                }
+                case NULL: {
+                    underlying = requireUnderlying(segment);
+
+                    underlying.set(fromIndexInclusive, toIndexInclusive);
+
+                    break;
+                }
             }
+
         }
     }
 
@@ -255,29 +276,45 @@ public class SparseBitLevelN implements SparseBitSet<SparseBitIndex> {
     }
 
     private void clearSegment(SparseBitIndex fromIndexInclusive, SparseBitIndex toIndexInclusive, int segment) {
+        SparseBitLevel underlying = underlyings[segment];
+        if (underlying.getType() == SparseBitLevelType.NULL) {
+            return;
+        }
+
         int affected = 1 + toIndexInclusive.segment(level - 1) - fromIndexInclusive.segment(level - 1);
 
         if (affected >= SparseBitUtil.LEVEL_SIZE) {
-            if (collapses.get(segment)) {
-                collapses.clear(segment);
-                currentOccupancy--;
-            } else {
-                SparseBitSet<SparseBitIndex> underlying = underlyings[segment];
-                if (underlying != null) {
+            switch (underlying.getType()) {
+                case REAL: {
                     dismissUnderlying(segment);
+
+                    break;
+                }
+                case FULL: {
+                    underlyings[segment] = SparseBitLevels.NULL;
+
+                    currentFullCount--;
+
+                    break;
                 }
             }
         } else {
-            if (collapses.get(segment)) {
-                SparseBitSet<SparseBitIndex> underlying = unfoldUnderlying(segment);
-                underlying.clear(fromIndexInclusive, toIndexInclusive);
-            } else {
-                SparseBitSet<SparseBitIndex> underlying = underlyings[segment];
-                if (underlying != null) {
+            switch (underlying.getType()) {
+                case REAL: {
                     underlying.clear(fromIndexInclusive, toIndexInclusive);
+
                     if (underlying.isEmpty()) {
                         dismissUnderlying(segment);
                     }
+
+                    break;
+                }
+                case FULL: {
+                    underlying = unfoldUnderlying(segment);
+
+                    underlying.clear(fromIndexInclusive, toIndexInclusive);
+
+                    break;
                 }
             }
         }
@@ -303,40 +340,68 @@ public class SparseBitLevelN implements SparseBitSet<SparseBitIndex> {
     }
 
     private void flipSegment(SparseBitIndex fromIndexInclusive, SparseBitIndex toIndexInclusive, int segment) {
+        SparseBitLevel underlying = underlyings[segment];
+
         int affected = 1 + toIndexInclusive.segment(level - 1) - fromIndexInclusive.segment(level - 1);
 
         if (affected >= SparseBitUtil.LEVEL_SIZE) {
-            if (collapses.get(segment)) {
-                collapses.clear(segment);
-                currentOccupancy--;
-            } else {
-                SparseBitSet<SparseBitIndex> underlying = underlyings[segment];
-                if (underlying != null) {
+            switch (underlying.getType()) {
+                case REAL: {
                     underlying.flip(fromIndexInclusive, toIndexInclusive);
 
                     if (underlying.isFull()) {
-                        collapseUnderlying(segment);
+                        squashUnderlying(segment);
                     } else if (underlying.isEmpty()) {
                         dismissUnderlying(segment);
                     }
-                } else {
-                    collapses.set(segment);
-                    currentOccupancy++;
+
+                    break;
+                }
+                case NULL: {
+                    underlyings[segment] = SparseBitLevels.SQUASHED;
+
+                    currentFullCount++;
+
+                    break;
+                }
+                case FULL: {
+                    underlyings[segment] = SparseBitLevels.NULL;
+
+                    currentFullCount--;
+
+                    break;
                 }
             }
         } else {
-            SparseBitSet<SparseBitIndex> underlying;
+            switch (underlying.getType()) {
+                case NULL: {
+                    if (affected >= maximumOccupancy) {
+                        underlyings[segment] = SparseBitLevels.SQUASHED;
 
-            if (collapses.get(segment)) {
-                underlying = unfoldUnderlying(segment);
-            } else {
-                underlying = requireUnderlying(segment);
+                        currentFullCount++;
+
+                        return;
+                    } else {
+                        underlying = requireUnderlying(segment);
+
+                        break;
+                    }
+                }
+                case FULL: {
+                    if (SparseBitUtil.LEVEL_SIZE - affected >= maximumOccupancy) {
+                        return;
+                    } else {
+                        underlying = unfoldUnderlying(segment);
+
+                        break;
+                    }
+                }
             }
-
+            
             underlying.flip(fromIndexInclusive, toIndexInclusive);
 
             if (underlying.isFull()) {
-                collapseUnderlying(segment);
+                squashUnderlying(segment);
             } else if (underlying.isEmpty()) {
                 dismissUnderlying(segment);
             }
@@ -348,13 +413,15 @@ public class SparseBitLevelN implements SparseBitSet<SparseBitIndex> {
      *
      * @param segment Segment index
      */
-    private void collapseUnderlying(int segment) {
-        collapses.set(segment);
+    private void squashUnderlying(int segment) {
+        if (underlyings[segment].getType() != SparseBitLevelType.REAL) {
+            throw new IllegalStateException("Only REAL level can be squashed");
+        }
 
-        underlyings[segment] = null;
+        underlyings[segment] = SparseBitLevels.SQUASHED;
 
-        currentOccupancy++;
-        currentUsage--;
+        currentFullCount++;
+        currentRealCount--;
     }
 
     /**
@@ -362,16 +429,18 @@ public class SparseBitLevelN implements SparseBitSet<SparseBitIndex> {
      *
      * @param segment Segment index
      */
-    private SparseBitSet<SparseBitIndex> unfoldUnderlying(int segment) {
-        collapses.clear(segment);
+    private SparseBitLevel unfoldUnderlying(int segment) {
+        if (underlyings[segment].getType() != SparseBitLevelType.FULL) {
+            throw new IllegalStateException("Only SQUASHED level can be unfold");
+        }
 
-        SparseBitSet<SparseBitIndex> underlying = SparseBitLevels.createUnderlying(maximumOccupancy, level);
+        SparseBitLevel underlying = SparseBitLevels.createLevel(maximumOccupancy, level);
         underlying.setAll();
 
         underlyings[segment] = underlying;
 
-        currentOccupancy--;
-        currentUsage++;
+        currentFullCount--;
+        currentRealCount++;
 
         return underlying;
     }
@@ -383,16 +452,16 @@ public class SparseBitLevelN implements SparseBitSet<SparseBitIndex> {
      *                
      * @return Level object
      */
-    private SparseBitSet<SparseBitIndex> requireUnderlying(int segment) {
-        SparseBitSet<SparseBitIndex> underlying = underlyings[segment];
-
-        if (underlying == null) {
-            underlying = SparseBitLevels.createUnderlying(maximumOccupancy, level);
-
-            underlyings[segment] = underlying;
-
-            currentUsage++;
+    private SparseBitLevel requireUnderlying(int segment) {
+        if (underlyings[segment].getType() != SparseBitLevelType.NULL) {
+            throw new IllegalStateException("Only NULL level can be replaced with real level");
         }
+
+        SparseBitLevel underlying = SparseBitLevels.createLevel(maximumOccupancy, level);
+
+        underlyings[segment] = underlying;
+
+        currentRealCount++;
 
         return underlying;
     }
@@ -403,9 +472,13 @@ public class SparseBitLevelN implements SparseBitSet<SparseBitIndex> {
      * @param segment Segment index
      */
     private void dismissUnderlying(int segment) {
-        underlyings[segment] = null;
+        if (underlyings[segment].getType() != SparseBitLevelType.REAL) {
+            throw new IllegalStateException("Only REAL level can be dismissed");
+        }
 
-        currentUsage--;
+        underlyings[segment] = SparseBitLevels.NULL;
+
+        currentRealCount--;
     }
 
 }

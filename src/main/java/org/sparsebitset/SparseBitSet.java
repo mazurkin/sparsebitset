@@ -82,7 +82,7 @@ public interface SparseBitSet<I extends SparseBitIndex> {
      * Set a range of bits
      *
      * @param fromIndexInclusive Start of the range (inclusive)
-     * @param toIndexInclusive Start of the range (inclusive)
+     * @param toIndexInclusive End of the range (inclusive)
      */
     void set(I fromIndexInclusive, I toIndexInclusive);
 
@@ -90,7 +90,7 @@ public interface SparseBitSet<I extends SparseBitIndex> {
      * Clear a range of bits
      *
      * @param fromIndexInclusive Start of the range (inclusive)
-     * @param toIndexInclusive Start of the range (inclusive)
+     * @param toIndexInclusive End of the range (inclusive)
      */
     void clear(I fromIndexInclusive, I toIndexInclusive);
 
@@ -98,7 +98,7 @@ public interface SparseBitSet<I extends SparseBitIndex> {
      * Flip a range of bits
      *
      * @param fromIndexInclusive Start of the range (inclusive)
-     * @param toIndexInclusive Start of the range (inclusive)
+     * @param toIndexInclusive End of the range (inclusive)
      */
     void flip(I fromIndexInclusive, I toIndexInclusive);
 

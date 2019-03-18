@@ -1,29 +1,36 @@
 package org.sparsebitset.level;
 
-import org.sparsebitset.SparseBitSet;
-import org.sparsebitset.index.SparseBitIndex;
-
 /**
  * Factory for layers
  */
 public final class SparseBitLevels {
 
-    private SparseBitLevels() {
-    }
+    /**
+     * Null layer (all bits are set)
+     */
+    public static final SparseBitLevel NULL = SparseBitLevelNull.INSTANCE;
+
+    /**
+     * Squashed layer (no any bits are set)
+     */
+    public static final SparseBitLevel SQUASHED = SparseBitLevelSquashed.INSTANCE;
 
     /**
      * Create underlying level
      *
      * @return Level object
      */
-    public static SparseBitSet<SparseBitIndex> createUnderlying(int maximumOccupancy, int levels) {
-        int underlyingLevel = levels - 1;
+    public static SparseBitLevel createLevel(int maximumOccupancy, int levels) {
+        int level = levels - 1;
 
-        if (underlyingLevel > 0) {
-            return new SparseBitLevelN(maximumOccupancy, underlyingLevel);
+        if (level > 0) {
+            return new SparseBitLevelN(maximumOccupancy, level);
         } else {
             return new SparseBitLevel0(maximumOccupancy);
         }
+    }
+
+    private SparseBitLevels() {
     }
 
 }
