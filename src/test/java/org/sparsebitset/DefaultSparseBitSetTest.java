@@ -3,6 +3,7 @@ package org.sparsebitset;
 import org.junit.Test;
 import org.sparsebitset.index.SparseBitInetAddressIndex;
 import org.sparsebitset.index.SparseBitIntIndex;
+import org.sparsebitset.index.SparseBitLongIndex;
 
 import java.net.Inet6Address;
 
@@ -439,6 +440,32 @@ public class DefaultSparseBitSetTest {
         // but no squashing on neighbour levels
         assertFalse(set.get(SparseBitIntIndex.of(0x112232FF)));
         assertFalse(set.get(SparseBitIntIndex.of(0x11223400)));
+    }
+
+    @Test
+    public void testHugeRange() {
+        SparseBitSet<SparseBitLongIndex> set = new DefaultSparseBitSet<>(SparseBitLongIndex.LEVELS);
+
+        // set all the bits
+        set.set(SparseBitLongIndex.of(0x0000_0000_0000_0000L), SparseBitLongIndex.of(0xFFFF_FFFF_FFFF_FFFFL));
+
+        assertTrue(set.get(SparseBitLongIndex.of(0x0000_0000_0000_0000L)));
+        assertTrue(set.get(SparseBitLongIndex.of(0x8000_0000_0000_0000L)));
+        assertTrue(set.get(SparseBitLongIndex.of(0xFFFF_FFFF_FFFF_FFFFL)));
+
+        // clear all the bits
+        set.clear(SparseBitLongIndex.of(0x0000_0000_0000_0000L), SparseBitLongIndex.of(0xFFFF_FFFF_FFFF_FFFFL));
+
+        assertFalse(set.get(SparseBitLongIndex.of(0x0000_0000_0000_0000L)));
+        assertFalse(set.get(SparseBitLongIndex.of(0x8000_0000_0000_0000L)));
+        assertFalse(set.get(SparseBitLongIndex.of(0xFFFF_FFFF_FFFF_FFFFL)));
+
+        // flip all the bits
+        set.flip(SparseBitLongIndex.of(0x0000_0000_0000_0000L), SparseBitLongIndex.of(0xFFFF_FFFF_FFFF_FFFFL));
+
+        assertTrue(set.get(SparseBitLongIndex.of(0x0000_0000_0000_0000L)));
+        assertTrue(set.get(SparseBitLongIndex.of(0x8000_0000_0000_0000L)));
+        assertTrue(set.get(SparseBitLongIndex.of(0xFFFF_FFFF_FFFF_FFFFL)));
     }
 
     private static void checkRange(SparseBitSet<SparseBitIntIndex> set,

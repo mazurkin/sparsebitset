@@ -30,4 +30,11 @@ public class SparseBitLongIndexTest {
 
         assertEquals("0000000000000000", index.toString());
     }
+
+    @Test
+    public void testNegative() {
+        SparseBitLongIndex index = SparseBitLongIndex.of(0x80000000_00000000L);
+
+        assertEquals(0x80, index.segment(7));
+    }
 }
