@@ -17,7 +17,7 @@ public class IPv6Test {
 
     @Before
     public void setUp() {
-        set = DefaultSparseBitSet.createWithBits(128);
+        set = DeepSparseBitSet.createWithBits(128);
     }
 
     @Test

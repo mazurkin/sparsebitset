@@ -20,7 +20,7 @@ public class MixedSparseBitSet<I extends SparseBitIndex> implements SparseBitSet
 
     public MixedSparseBitSet(int levels) {
         this.individuals = new HashSet<>();
-        this.ranges = DefaultSparseBitSet.createWithLevels(levels);
+        this.ranges = DeepSparseBitSet.createWithLevels(levels);
     }
 
     @Override

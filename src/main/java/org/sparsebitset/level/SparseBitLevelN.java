@@ -170,24 +170,31 @@ public class SparseBitLevelN implements SparseBitLevel {
 
         SparseBitLevel underlying = underlyings[segment];
         switch (underlying.getType()) {
+            case REAL: {
+                underlying.flip(index);
+
+                if (underlying.isFull()) {
+                    squashUnderlying(segment);
+                } else if (underlying.isEmpty()) {
+                    dismissUnderlying(segment);
+                }
+
+                break;
+            }
             case NULL: {
                 underlying = requireUnderlying(segment);
+
+                underlying.flip(index);
 
                 break;
             }
             case FULL: {
                 underlying = unfoldUnderlying(segment);
 
+                underlying.flip(index);
+
                 break;
             }
-        }
-
-        underlying.flip(index);
-
-        if (underlying.isFull()) {
-            squashUnderlying(segment);
-        } else if (underlying.isEmpty()) {
-            dismissUnderlying(segment);
         }
     }
 
@@ -212,6 +219,7 @@ public class SparseBitLevelN implements SparseBitLevel {
 
     private void setSegment(SparseBitIndex fromIndexInclusive, SparseBitIndex toIndexInclusive, int segment) {
         SparseBitLevel underlying = underlyings[segment];
+
         if (underlying.getType() == SparseBitLevelType.FULL) {
             return;
         }
@@ -277,6 +285,7 @@ public class SparseBitLevelN implements SparseBitLevel {
 
     private void clearSegment(SparseBitIndex fromIndexInclusive, SparseBitIndex toIndexInclusive, int segment) {
         SparseBitLevel underlying = underlyings[segment];
+
         if (underlying.getType() == SparseBitLevelType.NULL) {
             return;
         }
@@ -342,21 +351,22 @@ public class SparseBitLevelN implements SparseBitLevel {
     private void flipSegment(SparseBitIndex fromIndexInclusive, SparseBitIndex toIndexInclusive, int segment) {
         SparseBitLevel underlying = underlyings[segment];
 
+        if (underlying.getType() == SparseBitLevelType.REAL) {
+            underlying.flip(fromIndexInclusive, toIndexInclusive);
+
+            if (underlying.isFull()) {
+                squashUnderlying(segment);
+            } else if (underlying.isEmpty()) {
+                dismissUnderlying(segment);
+            }
+
+            return;
+        }
+
         int affected = 1 + toIndexInclusive.segment(level - 1) - fromIndexInclusive.segment(level - 1);
 
         if (affected >= SparseBitUtil.LEVEL_SIZE) {
             switch (underlying.getType()) {
-                case REAL: {
-                    underlying.flip(fromIndexInclusive, toIndexInclusive);
-
-                    if (underlying.isFull()) {
-                        squashUnderlying(segment);
-                    } else if (underlying.isEmpty()) {
-                        dismissUnderlying(segment);
-                    }
-
-                    break;
-                }
                 case NULL: {
                     underlyings[segment] = SparseBitLevels.FULL;
 
@@ -375,35 +385,19 @@ public class SparseBitLevelN implements SparseBitLevel {
         } else {
             switch (underlying.getType()) {
                 case NULL: {
-                    if (affected >= maximumOccupancy) {
-                        underlyings[segment] = SparseBitLevels.FULL;
+                    underlying = requireUnderlying(segment);
 
-                        currentFullCount++;
+                    underlying.flip(fromIndexInclusive, toIndexInclusive);
 
-                        return;
-                    } else {
-                        underlying = requireUnderlying(segment);
-
-                        break;
-                    }
+                    break;
                 }
                 case FULL: {
-                    if (SparseBitUtil.LEVEL_SIZE - affected >= maximumOccupancy) {
-                        return;
-                    } else {
-                        underlying = unfoldUnderlying(segment);
+                    underlying = unfoldUnderlying(segment);
 
-                        break;
-                    }
+                    underlying.flip(fromIndexInclusive, toIndexInclusive);
+
+                    break;
                 }
-            }
-            
-            underlying.flip(fromIndexInclusive, toIndexInclusive);
-
-            if (underlying.isFull()) {
-                squashUnderlying(segment);
-            } else if (underlying.isEmpty()) {
-                dismissUnderlying(segment);
             }
         }
     }
@@ -420,8 +414,8 @@ public class SparseBitLevelN implements SparseBitLevel {
 
         underlyings[segment] = SparseBitLevels.FULL;
 
-        currentFullCount++;
         currentRealCount--;
+        currentFullCount++;
     }
 
     /**

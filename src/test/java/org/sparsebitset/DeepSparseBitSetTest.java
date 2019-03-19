@@ -11,11 +11,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class DefaultSparseBitSetTest {
+public class DeepSparseBitSetTest {
 
     @Test
     public void testSimple() {
-        SparseBitSet<SparseBitIntIndex> set = new DefaultSparseBitSet<>(SparseBitIntIndex.LEVELS);
+        SparseBitSet<SparseBitIntIndex> set = new DeepSparseBitSet<>(SparseBitIntIndex.LEVELS);
 
         // check the bit
         assertFalse(set.get(SparseBitIntIndex.of(0x11223344)));
@@ -52,7 +52,7 @@ public class DefaultSparseBitSetTest {
 
     @Test
     public void testFolding() {
-        SparseBitSet<SparseBitIntIndex> set = new DefaultSparseBitSet<>(SparseBitIntIndex.LEVELS);
+        SparseBitSet<SparseBitIntIndex> set = new DeepSparseBitSet<>(SparseBitIntIndex.LEVELS);
 
         // add 255 bits
         for (int i = 0; i < 255; i++) {
@@ -101,7 +101,7 @@ public class DefaultSparseBitSetTest {
     @Test
     public void testIPv6() throws Exception {
         // IPv6 has 128-bit index space
-        SparseBitSet<SparseBitInetAddressIndex> set = DefaultSparseBitSet.createWithBits(128);
+        SparseBitSet<SparseBitInetAddressIndex> set = DeepSparseBitSet.createWithBits(128);
 
         // set individual IP
         assertTrue(set.set(
@@ -120,7 +120,7 @@ public class DefaultSparseBitSetTest {
 
     @Test
     public void testFull() {
-        SparseBitSet<SparseBitIntIndex> set = new DefaultSparseBitSet<>(SparseBitIntIndex.LEVELS);
+        SparseBitSet<SparseBitIntIndex> set = new DeepSparseBitSet<>(SparseBitIntIndex.LEVELS);
 
         set.setAll();
         set.validate();
@@ -154,7 +154,7 @@ public class DefaultSparseBitSetTest {
 
     @Test
     public void testClean() {
-        SparseBitSet<SparseBitIntIndex> set = new DefaultSparseBitSet<>(SparseBitIntIndex.LEVELS);
+        SparseBitSet<SparseBitIntIndex> set = new DeepSparseBitSet<>(SparseBitIntIndex.LEVELS);
 
         assertTrue(set.isEmpty());
         assertFalse(set.isFull());
@@ -187,7 +187,7 @@ public class DefaultSparseBitSetTest {
 
     @Test
     public void testRanges() {
-        SparseBitSet<SparseBitIntIndex> set = new DefaultSparseBitSet<>(SparseBitIntIndex.LEVELS);
+        SparseBitSet<SparseBitIntIndex> set = new DeepSparseBitSet<>(SparseBitIntIndex.LEVELS);
 
         // set the large range
         // 0x11223101 - 0x112235FE
@@ -283,7 +283,7 @@ public class DefaultSparseBitSetTest {
 
     @Test
     public void testSingleRanges() {
-        SparseBitSet<SparseBitIntIndex> set = new DefaultSparseBitSet<>(SparseBitIntIndex.LEVELS);
+        SparseBitSet<SparseBitIntIndex> set = new DeepSparseBitSet<>(SparseBitIntIndex.LEVELS);
 
         // set a single bit
         set.set(SparseBitIntIndex.of(0x11223344), SparseBitIntIndex.of(0x11223344));
@@ -333,14 +333,14 @@ public class DefaultSparseBitSetTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testInvalidRanges() {
-        SparseBitSet<SparseBitIntIndex> set = new DefaultSparseBitSet<>(SparseBitIntIndex.LEVELS);
+        SparseBitSet<SparseBitIntIndex> set = new DeepSparseBitSet<>(SparseBitIntIndex.LEVELS);
 
         set.set(SparseBitIntIndex.of(0x11223345), SparseBitIntIndex.of(0x11223344));
     }
 
     @Test
     public void testLevel0Bits() {
-        SparseBitSet<SparseBitIntIndex> set = DefaultSparseBitSet.createWithLevels(1);
+        SparseBitSet<SparseBitIntIndex> set = DeepSparseBitSet.createWithLevels(1);
 
         assertTrue(set.isEmpty());
         assertFalse(set.isFull());
@@ -418,7 +418,7 @@ public class DefaultSparseBitSetTest {
 
     @Test
     public void testPrematureSquashing() {
-        SparseBitSet<SparseBitIntIndex> set = new DefaultSparseBitSet<>(SparseBitIntIndex.LEVELS, 240);
+        SparseBitSet<SparseBitIntIndex> set = new DeepSparseBitSet<>(SparseBitIntIndex.LEVELS, 240);
         set.validate();
 
         // set 239 bits
@@ -444,7 +444,7 @@ public class DefaultSparseBitSetTest {
 
     @Test
     public void testHugeRange() {
-        SparseBitSet<SparseBitLongIndex> set = new DefaultSparseBitSet<>(SparseBitLongIndex.LEVELS);
+        SparseBitSet<SparseBitLongIndex> set = new DeepSparseBitSet<>(SparseBitLongIndex.LEVELS);
 
         // set all the bits
         set.set(SparseBitLongIndex.of(0x0000_0000_0000_0000L), SparseBitLongIndex.of(0xFFFF_FFFF_FFFF_FFFFL));

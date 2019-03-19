@@ -4,7 +4,7 @@ import org.sparsebitset.index.SparseBitIndex;
 
 /**
  * <p>Sparse bit set abstraction. Unlike standard {@link java.util.BitSet} it can be addressed by very
- * long indexes including IPv6 which is 128-bit long</p>
+ * long indexes including IPv6 (which is 128-bit value)</p>
  *
  * @param <I> Type of the index
  */

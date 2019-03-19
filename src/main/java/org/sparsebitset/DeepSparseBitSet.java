@@ -16,7 +16,7 @@ import org.sparsebitset.util.SparseBitUtil;
  *
  * @param <I> Index type
  */
-public class DefaultSparseBitSet<I extends SparseBitIndex> implements SparseBitSet<I> {
+public class DeepSparseBitSet<I extends SparseBitIndex> implements SparseBitSet<I> {
 
     private final int levels;
 
@@ -28,7 +28,7 @@ public class DefaultSparseBitSet<I extends SparseBitIndex> implements SparseBitS
      * @param levels How many levels are in the index (bits = levels * 8)
      * @param maximumOccupancy How many items (bits) must be in underlying layer in order to collapse it (2..256)
      */
-    public DefaultSparseBitSet(int levels, int maximumOccupancy) {
+    public DeepSparseBitSet(int levels, int maximumOccupancy) {
         if (levels <= 0) {
             throw new IllegalArgumentException("Need positive level count: " + levels);
         }
@@ -46,7 +46,7 @@ public class DefaultSparseBitSet<I extends SparseBitIndex> implements SparseBitS
      *
      * @param levels How many levels are in the index (bits = levels * 8)
      */
-    public DefaultSparseBitSet(int levels) {
+    public DeepSparseBitSet(int levels) {
         this(levels, SparseBitUtil.LEVEL_SIZE);
     }
 
@@ -62,7 +62,7 @@ public class DefaultSparseBitSet<I extends SparseBitIndex> implements SparseBitS
             throw new IllegalArgumentException("Need positive level count: " + levels);
         }
 
-        return new DefaultSparseBitSet<>(levels);
+        return new DeepSparseBitSet<>(levels);
     }
 
     /**
@@ -81,7 +81,7 @@ public class DefaultSparseBitSet<I extends SparseBitIndex> implements SparseBitS
             throw new IllegalArgumentException("Bit count must be divisible by 8: " + bits);
         }
 
-        return new DefaultSparseBitSet<>(bits / 8);
+        return new DeepSparseBitSet<>(bits / 8);
     }
 
     @Override

@@ -21,7 +21,7 @@ public class GrantConcurrentTest {
 
     @Before
     public void setUp() {
-        SparseBitSet<SparseBitIntIndex> delegate = DefaultSparseBitSet.createWithLevels(SparseBitIntIndex.LEVELS);
+        SparseBitSet<SparseBitIntIndex> delegate = DeepSparseBitSet.createWithLevels(SparseBitIntIndex.LEVELS);
 
         this.set = ConcurrentSparseBitSetProxy.proxy(delegate);
     }

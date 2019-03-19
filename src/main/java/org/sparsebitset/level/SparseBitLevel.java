@@ -1,12 +1,11 @@
 package org.sparsebitset.level;
 
-import org.sparsebitset.SparseBitSet;
 import org.sparsebitset.index.SparseBitIndex;
 
 /**
  * <p>Internal level interface</p>
  */
-public interface SparseBitLevel extends SparseBitSet<SparseBitIndex> {
+public interface SparseBitLevel {
 
     SparseBitLevelType getType();
 
