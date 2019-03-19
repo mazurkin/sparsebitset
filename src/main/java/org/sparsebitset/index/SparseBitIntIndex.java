@@ -5,7 +5,7 @@ import org.sparsebitset.util.SparseBitUtil;
 /**
  * Index for {@code int} value - will treat a value as unsigned
  */
-public class SparseBitIntIndex implements SparseBitIndex {
+public class SparseBitIntIndex implements SparseBitIndex, Comparable<SparseBitIntIndex> {
 
     public static final int LEVELS = Integer.BYTES;
 
@@ -41,7 +41,29 @@ public class SparseBitIntIndex implements SparseBitIndex {
     }
 
     @Override
+    public int compareTo(SparseBitIntIndex that) {
+        return Integer.compare(this.index, that.index);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SparseBitIntIndex that = (SparseBitIntIndex) o;
+
+        return index == that.index;
+    }
+
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(index);
+    }
+
+    @Override
     public String toString() {
         return String.format("%08X", index);
     }
+
 }
