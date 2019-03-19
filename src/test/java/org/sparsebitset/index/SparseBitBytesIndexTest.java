@@ -22,5 +22,4 @@ public class SparseBitBytesIndexTest {
         assertEquals("FF112233", index.toString());
     }
 
-
 }
