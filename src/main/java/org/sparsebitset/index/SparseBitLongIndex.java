@@ -50,7 +50,7 @@ public class SparseBitLongIndex implements SparseBitIndex, Comparable<SparseBitL
 
     @Override
     public int compareTo(SparseBitLongIndex that) {
-        return Long.compare(this.index, that.index);
+        return Long.compareUnsigned(this.index, that.index);
     }
 
     @Override

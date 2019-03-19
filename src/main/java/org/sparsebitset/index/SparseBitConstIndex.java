@@ -33,7 +33,7 @@ public final class SparseBitConstIndex implements SparseBitIndex, Comparable<Spa
 
     @Override
     public int compareTo(SparseBitConstIndex that) {
-        return Integer.compare(this.segment, that.segment);
+        return Integer.compareUnsigned(this.segment, that.segment);
     }
 
     @Override

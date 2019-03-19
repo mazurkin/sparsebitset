@@ -9,7 +9,7 @@ public class MixedSparseBitSetTest {
 
     @Test
     public void testOps() {
-        SparseBitSet<SparseBitIntIndex> set = DefaultSparseBitSet.createWithLevels(SparseBitIntIndex.LEVELS);
+        SparseBitSet<SparseBitIntIndex> set = new MixedSparseBitSet<>(SparseBitIntIndex.LEVELS);
 
         // set range
         set.set(SparseBitIntIndex.of(0x10000000), SparseBitIntIndex.of(0x1FFFFFFF));

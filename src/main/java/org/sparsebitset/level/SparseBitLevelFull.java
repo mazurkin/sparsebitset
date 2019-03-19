@@ -5,11 +5,11 @@ import org.sparsebitset.index.SparseBitIndex;
 /**
  * Squashed layer (no any bits are set)
  */
-public class SparseBitLevelSquashed implements SparseBitLevel {
+public class SparseBitLevelFull implements SparseBitLevel {
 
-    static final SparseBitLevel INSTANCE = new SparseBitLevelSquashed();
+    static final SparseBitLevel INSTANCE = new SparseBitLevelFull();
 
-    private SparseBitLevelSquashed() {
+    private SparseBitLevelFull() {
     }
 
     @Override

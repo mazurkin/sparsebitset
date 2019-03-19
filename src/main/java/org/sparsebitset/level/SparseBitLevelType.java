@@ -16,8 +16,8 @@ public enum SparseBitLevelType {
     /**
      * All bits are 1
      *
-     * @see SparseBitLevels#SQUASHED
-     * @see SparseBitLevelSquashed
+     * @see SparseBitLevels#FULL
+     * @see SparseBitLevelFull
      */
     FULL,
 

@@ -7,7 +7,10 @@ import java.util.Set;
 
 /**
  * <p>Combines hashtable for individual indices and sparse bit set for ranges. Doesn't support {@code clear()}
- * and {@code flip()} methods. Which means you can use only {@code get()} and {@code set()} methods</p>
+ * and {@code flip()} methods. Which means you can use only {@code get()} and {@code set()} methods
+ * for the sake of memory footprint if you have a lot of individual indices.</p>
+ *
+ * @param <I> type of index
  */
 public class MixedSparseBitSet<I extends SparseBitIndex> implements SparseBitSet<I> {
 

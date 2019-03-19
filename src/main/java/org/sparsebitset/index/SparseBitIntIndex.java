@@ -42,7 +42,7 @@ public class SparseBitIntIndex implements SparseBitIndex, Comparable<SparseBitIn
 
     @Override
     public int compareTo(SparseBitIntIndex that) {
-        return Integer.compare(this.index, that.index);
+        return Integer.compareUnsigned(this.index, that.index);
     }
 
     @Override

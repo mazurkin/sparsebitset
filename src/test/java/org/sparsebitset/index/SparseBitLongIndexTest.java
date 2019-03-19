@@ -37,4 +37,21 @@ public class SparseBitLongIndexTest {
 
         assertEquals(0x80, index.segment(7));
     }
+
+    @Test
+    public void testCompare() {
+        SparseBitLongIndex i1 = SparseBitLongIndex.of(0x00000000_00000000L);
+        SparseBitLongIndex i2 = SparseBitLongIndex.of(0x80000000_00000000L);
+        SparseBitLongIndex i3 = SparseBitLongIndex.of(0x80000000_00000001L);
+        SparseBitLongIndex i4 = SparseBitLongIndex.of(0xFFFFFFFF_FFFFFFFFL);
+
+        assertTrue(i1.compareTo(i2) < 0);
+        assertTrue(i2.compareTo(i1) > 0);
+
+        assertTrue(i2.compareTo(i3) < 0);
+        assertTrue(i3.compareTo(i2) > 0);
+
+        assertTrue(i3.compareTo(i4) < 0);
+        assertTrue(i4.compareTo(i3) > 0);
+    }
 }

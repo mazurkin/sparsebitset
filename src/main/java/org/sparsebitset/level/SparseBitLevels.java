@@ -13,7 +13,7 @@ public final class SparseBitLevels {
     /**
      * Squashed layer (no any bits are set)
      */
-    public static final SparseBitLevel SQUASHED = SparseBitLevelSquashed.INSTANCE;
+    public static final SparseBitLevel FULL = SparseBitLevelFull.INSTANCE;
 
     /**
      * Create underlying level

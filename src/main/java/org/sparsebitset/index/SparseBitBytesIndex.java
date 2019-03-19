@@ -49,8 +49,8 @@ public class SparseBitBytesIndex implements SparseBitIndex, Comparable<SparseBit
         }
 
         for (int i = 0; i < levels1; i++) {
-            int v1 = this.index[i];
-            int v2 = that.index[i];
+            int v1 = SparseBitUtil.BYTE_MASK & this.index[i];
+            int v2 = SparseBitUtil.BYTE_MASK & that.index[i];
 
             if (v1 > v2) {
                 return +1;
@@ -107,8 +107,8 @@ public class SparseBitBytesIndex implements SparseBitIndex, Comparable<SparseBit
 
         StringBuilder sb = new StringBuilder(levels * 2);
 
-        for (int i = 0; i < levels; i++) {
-            sb.append(String.format("%02X", index[i]));
+        for (byte b : index) {
+            sb.append(String.format("%02X", b));
         }
 
         return sb.toString();

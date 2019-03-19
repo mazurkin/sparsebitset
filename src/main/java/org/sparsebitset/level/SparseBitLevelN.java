@@ -56,7 +56,7 @@ public class SparseBitLevelN implements SparseBitLevel {
     @Override
     public void setAll() {
         for (int i = 0; i < SparseBitUtil.LEVEL_SIZE; i++) {
-            underlyings[i] = SparseBitLevels.SQUASHED;
+            underlyings[i] = SparseBitLevels.FULL;
         }
 
         currentFullCount = SparseBitUtil.LEVEL_SIZE;
@@ -226,7 +226,7 @@ public class SparseBitLevelN implements SparseBitLevel {
                     break;
                 }
                 case NULL: {
-                    underlyings[segment] = SparseBitLevels.SQUASHED;
+                    underlyings[segment] = SparseBitLevels.FULL;
 
                     currentFullCount++;
 
@@ -358,7 +358,7 @@ public class SparseBitLevelN implements SparseBitLevel {
                     break;
                 }
                 case NULL: {
-                    underlyings[segment] = SparseBitLevels.SQUASHED;
+                    underlyings[segment] = SparseBitLevels.FULL;
 
                     currentFullCount++;
 
@@ -376,7 +376,7 @@ public class SparseBitLevelN implements SparseBitLevel {
             switch (underlying.getType()) {
                 case NULL: {
                     if (affected >= maximumOccupancy) {
-                        underlyings[segment] = SparseBitLevels.SQUASHED;
+                        underlyings[segment] = SparseBitLevels.FULL;
 
                         currentFullCount++;
 
@@ -418,7 +418,7 @@ public class SparseBitLevelN implements SparseBitLevel {
             throw new IllegalStateException("Only REAL level can be squashed");
         }
 
-        underlyings[segment] = SparseBitLevels.SQUASHED;
+        underlyings[segment] = SparseBitLevels.FULL;
 
         currentFullCount++;
         currentRealCount--;
