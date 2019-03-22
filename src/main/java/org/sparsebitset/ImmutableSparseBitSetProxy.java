@@ -16,7 +16,7 @@ public class ImmutableSparseBitSetProxy<I extends SparseBitIndex> implements Spa
      *
      * @param delegate Delegate instance
      */
-    public ImmutableSparseBitSetProxy(SparseBitSet<I> delegate) {
+    private ImmutableSparseBitSetProxy(SparseBitSet<I> delegate) {
         if (delegate == null) {
             throw new IllegalArgumentException("Delegate can't be null");
         }
@@ -34,6 +34,11 @@ public class ImmutableSparseBitSetProxy<I extends SparseBitIndex> implements Spa
      */
     public static <I extends SparseBitIndex> SparseBitSet<I> proxy(SparseBitSet<I> delegate) {
         return new ImmutableSparseBitSetProxy<>(delegate);
+    }
+
+    @Override
+    public SparseBitSet<I> copy() {
+        return ImmutableSparseBitSetProxy.proxy(delegate.copy());
     }
 
     @Override

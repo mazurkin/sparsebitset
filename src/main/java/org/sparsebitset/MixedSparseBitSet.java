@@ -23,6 +23,16 @@ public class MixedSparseBitSet<I extends SparseBitIndex> implements SparseBitSet
         this.ranges = DeepSparseBitSet.createWithLevels(levels);
     }
 
+    private MixedSparseBitSet(Set<I> individuals, SparseBitSet<I> ranges) {
+        this.individuals = individuals;
+        this.ranges = ranges;
+    }
+
+    @Override
+    public SparseBitSet<I> copy() {
+        return new MixedSparseBitSet<>(new HashSet<>(individuals), ranges.copy());
+    }
+
     @Override
     public boolean isEmpty() {
         return individuals.isEmpty() && ranges.isEmpty();

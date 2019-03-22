@@ -9,6 +9,8 @@ public interface SparseBitLevel {
 
     SparseBitLevelType getType();
 
+    SparseBitLevel copy();
+
     boolean isEmpty();
 
     boolean isFull();

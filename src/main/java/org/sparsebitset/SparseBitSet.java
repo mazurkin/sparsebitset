@@ -11,6 +11,13 @@ import org.sparsebitset.index.SparseBitIndex;
 public interface SparseBitSet<I extends SparseBitIndex> {
 
     /**
+     * Make a deep copy of the bit set
+     *
+     * @return Copy of the bit set
+     */
+    SparseBitSet<I> copy();
+
+    /**
      * Check is the set empty (no a single bit is set)
 
      * @return {@code true} if the set is empty

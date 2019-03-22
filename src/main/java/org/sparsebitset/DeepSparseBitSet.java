@@ -16,7 +16,7 @@ import org.sparsebitset.util.SparseBitUtil;
  *
  * @param <I> Index type
  */
-public class DeepSparseBitSet<I extends SparseBitIndex> implements SparseBitSet<I> {
+public class DeepSparseBitSet<I extends SparseBitIndex> implements SparseBitSet<I>, Cloneable {
 
     private final int levels;
 
@@ -28,6 +28,7 @@ public class DeepSparseBitSet<I extends SparseBitIndex> implements SparseBitSet<
      * @param levels How many levels are in the index (bits = levels * 8)
      * @param maximumOccupancy How many items (bits) must be in underlying layer in order to collapse it (2..256)
      */
+    @SuppressWarnings("WeakerAccess")
     public DeepSparseBitSet(int levels, int maximumOccupancy) {
         if (levels <= 0) {
             throw new IllegalArgumentException("Need positive level count: " + levels);
@@ -46,8 +47,20 @@ public class DeepSparseBitSet<I extends SparseBitIndex> implements SparseBitSet<
      *
      * @param levels How many levels are in the index (bits = levels * 8)
      */
+    @SuppressWarnings("WeakerAccess")
     public DeepSparseBitSet(int levels) {
         this(levels, SparseBitUtil.LEVEL_SIZE);
+    }
+
+    /**
+     * Private internal constructor
+     *
+     * @param levels Number of level
+     * @param base Base level
+     */
+    private DeepSparseBitSet(int levels, SparseBitLevel base) {
+        this.levels = levels;
+        this.base = base;
     }
 
     /**
@@ -57,6 +70,7 @@ public class DeepSparseBitSet<I extends SparseBitIndex> implements SparseBitSet<
      *
      * @return Sparse set
      */
+    @SuppressWarnings("WeakerAccess")
     public static <I extends SparseBitIndex> SparseBitSet<I> createWithLevels(int levels) {
         if (levels <= 0) {
             throw new IllegalArgumentException("Need positive level count: " + levels);
@@ -72,6 +86,7 @@ public class DeepSparseBitSet<I extends SparseBitIndex> implements SparseBitSet<
      *
      * @return Sparse set
      */
+    @SuppressWarnings("WeakerAccess")
     public static <I extends SparseBitIndex> SparseBitSet<I> createWithBits(int bits) {
         if (bits <= 0) {
             throw new IllegalArgumentException("Need positive bit count: " + bits);
@@ -82,6 +97,17 @@ public class DeepSparseBitSet<I extends SparseBitIndex> implements SparseBitSet<
         }
 
         return new DeepSparseBitSet<>(bits / 8);
+    }
+
+    @Override
+    public SparseBitSet<I> copy() {
+        return new DeepSparseBitSet<>(levels, base.copy());
+    }
+
+    @Override
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
+    public SparseBitSet<I> clone() {
+        return copy();
     }
 
     @Override

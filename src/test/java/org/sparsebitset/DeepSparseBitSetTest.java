@@ -468,6 +468,34 @@ public class DeepSparseBitSetTest {
         assertTrue(set.get(SparseBitLongIndex.of(0xFFFF_FFFF_FFFF_FFFFL)));
     }
 
+    @Test
+    public void testClone() {
+        SparseBitSet<SparseBitIntIndex> set = DeepSparseBitSet.createWithLevels(SparseBitIntIndex.LEVELS);
+
+        set.set(SparseBitIntIndex.of(0x7001_0000), SparseBitIntIndex.of(0x9001_FFFF));
+        set.validate();
+
+        assertFalse(set.get(SparseBitIntIndex.of(0x7000_0000)));
+        assertTrue(set.get(SparseBitIntIndex.of(0x8000_0000)));
+        assertFalse(set.get(SparseBitIntIndex.of(0x9002_0000)));
+
+        SparseBitSet<SparseBitIntIndex> clone = set.copy();
+        clone.validate();
+
+        assertFalse(clone.get(SparseBitIntIndex.of(0x7000_0000)));
+        assertTrue(clone.get(SparseBitIntIndex.of(0x8000_0000)));
+        assertFalse(clone.get(SparseBitIntIndex.of(0x9002_0000)));
+
+        set.clearAll();
+        set.validate();
+
+        clone.validate();
+
+        assertFalse(clone.get(SparseBitIntIndex.of(0x7000_0000)));
+        assertTrue(clone.get(SparseBitIntIndex.of(0x8000_0000)));
+        assertFalse(clone.get(SparseBitIntIndex.of(0x9002_0000)));
+    }
+
     private static void checkRange(SparseBitSet<SparseBitIntIndex> set,
                                    int fromIndexInclusive, int toIndexInclusive, boolean expected)
     {

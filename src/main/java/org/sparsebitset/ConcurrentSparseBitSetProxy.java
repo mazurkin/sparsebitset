@@ -28,18 +28,6 @@ public class ConcurrentSparseBitSetProxy<I extends SparseBitIndex> implements Sp
     /**
      * Constructs a thread-safe proxy for an underlying delegate
      *
-     * @param delegate Delegate instance
-     * @param <I> Type of index
-     *
-     * @return Thread-safe proxy instance
-     */
-    public static <I extends SparseBitIndex> SparseBitSet<I> proxy(SparseBitSet<I> delegate) {
-        return new ConcurrentSparseBitSetProxy<>(delegate);
-    }
-
-    /**
-     * Constructs a thread-safe proxy for an underlying delegate
-     *
      * @param delegate Delegate set
      * @param readWriteLock Read-Write lock
      */
@@ -54,6 +42,23 @@ public class ConcurrentSparseBitSetProxy<I extends SparseBitIndex> implements Sp
 
         this.delegate = delegate;
         this.lock = readWriteLock;
+    }
+
+    /**
+     * Constructs a thread-safe proxy for an underlying delegate
+     *
+     * @param delegate Delegate instance
+     * @param <I> Type of index
+     *
+     * @return Thread-safe proxy instance
+     */
+    public static <I extends SparseBitIndex> SparseBitSet<I> proxy(SparseBitSet<I> delegate) {
+        return new ConcurrentSparseBitSetProxy<>(delegate);
+    }
+
+    @Override
+    public SparseBitSet<I> copy() {
+        return ConcurrentSparseBitSetProxy.proxy(delegate.copy());
     }
 
     @Override

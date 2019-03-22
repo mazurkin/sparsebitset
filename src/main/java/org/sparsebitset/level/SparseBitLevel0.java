@@ -10,18 +10,27 @@ import java.util.BitSet;
  */
 public class SparseBitLevel0 implements SparseBitLevel {
 
-    private final BitSet bits;
-
     private final int maximumOccupancy;
+
+    private final BitSet bits;
 
     private int currentOccupancy;
 
     SparseBitLevel0(int maximumOccupancy) {
-        this.maximumOccupancy = maximumOccupancy;
-
         this.bits = new BitSet(SparseBitUtil.LEVEL_SIZE);
-
+        this.maximumOccupancy = maximumOccupancy;
         this.currentOccupancy = 0;
+    }
+
+    private SparseBitLevel0(int maximumOccupancy, BitSet bits) {
+        this.bits = bits;
+        this.maximumOccupancy = maximumOccupancy;
+        this.currentOccupancy = bits.cardinality();
+    }
+
+    @Override
+    public SparseBitLevel copy() {
+        return new SparseBitLevel0(maximumOccupancy, (BitSet) bits.clone());
     }
 
     @Override

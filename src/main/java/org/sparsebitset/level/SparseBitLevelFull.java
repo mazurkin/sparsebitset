@@ -13,6 +13,11 @@ public class SparseBitLevelFull implements SparseBitLevel {
     }
 
     @Override
+    public SparseBitLevel copy() {
+        return this;
+    }
+
+    @Override
     public SparseBitLevelType getType() {
         return SparseBitLevelType.FULL;
     }

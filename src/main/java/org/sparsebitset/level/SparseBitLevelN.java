@@ -28,6 +28,35 @@ public class SparseBitLevelN implements SparseBitLevel {
         clearAll();
     }
 
+    private SparseBitLevelN(int maximumOccupancy, int level, SparseBitLevel[] underlyings) {
+        this.maximumOccupancy = maximumOccupancy;
+        this.level = level;
+
+        this.underlyings = underlyings;
+
+        for (SparseBitLevel underlying : this.underlyings) {
+            switch (underlying.getType()) {
+                case REAL:
+                    currentRealCount++;
+                    break;
+                case FULL:
+                    currentFullCount++;
+                    break;
+            }
+        }
+    }
+
+    @Override
+    public SparseBitLevel copy() {
+        SparseBitLevel[] underlyings = new SparseBitLevel[SparseBitUtil.LEVEL_SIZE];
+
+        for (int i = 0; i < SparseBitUtil.LEVEL_SIZE; i++) {
+            underlyings[i] = this.underlyings[i].copy();
+        }
+
+        return new SparseBitLevelN(maximumOccupancy, level, underlyings);
+    }
+
     @Override
     public SparseBitLevelType getType() {
         return SparseBitLevelType.REAL;
