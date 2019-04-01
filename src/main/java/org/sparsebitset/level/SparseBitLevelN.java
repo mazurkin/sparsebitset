@@ -7,7 +7,7 @@ import org.sparsebitset.util.SparseBitUtil;
 /**
  * <p>Subset represents an intermediate level of hierarchical sparse bit set</p>
  */
-public class SparseBitLevelN implements SparseBitLevel {
+public final class SparseBitLevelN implements SparseBitLevel {
 
     private final int level;
 

@@ -8,7 +8,7 @@ import java.util.BitSet;
 /**
  * <p>Subset represents a final level of hierarchical sparse bit set</p>
  */
-public class SparseBitLevel0 implements SparseBitLevel {
+public final class SparseBitLevel0 implements SparseBitLevel {
 
     private final int maximumOccupancy;
 
